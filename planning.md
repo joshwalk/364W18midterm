@@ -12,6 +12,11 @@ table: cities
 - state
 
 table: zips
-- idvv
-- cityid
+- id
+- city_id
 - zip
+
+table: states
+- id
+- name
+- abbreviation

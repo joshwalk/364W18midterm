@@ -105,6 +105,10 @@ def all_cities():
 	names = City.query.all()
 	return render_template('cities.html',names=names)
 
+# @app.route('/zips')
+# def all_zips():
+#
+
 
 
 
