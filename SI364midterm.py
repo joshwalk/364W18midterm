@@ -33,9 +33,6 @@ db = SQLAlchemy(app)
 ######## HELPER FXNS (If any) ########
 ######################################
 
-
-
-
 ##################
 ##### MODELS #####
 ##################
@@ -47,28 +44,49 @@ class ZIP(db.Model):
 	city_id = db.Column(db.Integer,db.ForeignKey("cities.id"))
 
 	def __repr__(self):
-	    return "ZIP: {}".format(self.zip_code)
+		return "ZIP: {}".format(self.zip_code)
 
 class City(db.Model):
 	__tablename__ = "cities"
 	id = db.Column(db.Integer,primary_key=True)
 	name = db.Column(db.String(64))
-	state = db.Column(db.String(64))
+	state_id = db.Column(db.Integer,db.ForeignKey("states.id"))
 
 	def __repr__(self):
-	    return "{} (State: {})".format(self.name, self.state)
+		return "City: {}".format(self.name)
+
+class State(db.Model):
+	__tablename__ = "states"
+	id = db.Column(db.Integer,primary_key=True)
+	name = db.Column(db.String(64))
+	abbrev = db.Column(db.String(64))
+
+	def __repr__(self):
+		return "State name:{} Abbreviation: {})".format(self.name, self.abbrev)
 
 
 ###################
 ###### FORMS ######
 ###################
 
+def check_valid_state(form,field):
+	states = ["AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DC", "DE", "FL", "GA",
+		  "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD",
+		  "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ",
+		  "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC",
+		  "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"] # I got this list from https://gist.github.com/JeffPaine/3083347
+	if field.data.upper() not in states:
+		raise ValidationError("Error: must be valid state abbreviation")
+
 class ZIPForm(FlaskForm):
-	name = StringField("Enter the name of a city:",validators=[Required()])
-	state = StringField("Enter state name:", validators=[Required()])
+	name = StringField("Enter the name of a US city:",validators=[Required()])
+	state = StringField("Enter state abbreviation:", validators=[Required(), check_valid_state])
 	submit = SubmitField()
 
-
+class UserForm(FlaskForm):
+	username = StringField("Enter your user name:",validators=[Required()])
+	fullname = StringField("Enter your full name:",validators=[Required()])
+	submit = SubmitField()
 
 #######################
 ###### VIEW FXNS ######
@@ -82,35 +100,56 @@ def page_not_found(e):
 def home():
 	form = ZIPForm() # User should be able to enter name after name and each one will be saved, even if it's a duplicate! Sends data with GET
 	if form.validate_on_submit():
-		name = form.name.data
-		state  = form.state.data
-		city = City(name=name, state=state)
-		db.session.add(city)
-		db.session.commit()
-		response = requests.get("http://api.zippopotam.us/us/" + state.lower() + "/" + name.lower())
+		city_entered = form.name.data
+		state_entered  = form.state.data
+		response = requests.get("http://api.zippopotam.us/us/" + state_entered.lower() + "/" + city_entered.lower())
 		data = json.loads(response.text)
-		results = data['places']
-		for place in results:
-			city_name = place["place name"]
+
+		state_fullname = data["state"]
+		state_abbrev = data["state abbreviation"]
+		state = State.query.filter_by(abbrev=state_abbrev).first()
+		if state:
+			state_id = state.id
+		else:
+			newstate = State(name=state_fullname,abbrev=state_abbrev)
+			db.session.add(newstate)
+			db.session.commit()
+			state_id = State.query.filter_by(name=state_fullname).first().id
+
+		city_name = data["place name"]
+		if City.query.filter_by(name=city_name, state_id=state_id).first():
+			flash("the city and state entered is already in the database")
+			return redirect(url_for("all_cities"))
+		else:
+			newcity =  City(name=city_name, state_id=state_id)
+			db.session.add(newcity)
+			db.session.commit()
+
+		for place in data['places']:
 			zip_code = place["post code"]
-			cities_city = City.query.filter_by(name=city_name).first()
-			newzip = ZIP(zip_code=zip_code, city_id=cities_city.id)
+			city_id = City.query.filter_by(name=city_name).first().id
+			newzip = ZIP(zip_code=zip_code, city_id=city_id)
 			db.session.add(newzip)
 			db.session.commit()
-		return redirect(url_for('all_cities'))
-	return render_template('base.html',form=form)
+		return redirect(url_for('all_zips'))
+	return render_template('index.html',form=form)
 
 @app.route('/cities')
 def all_cities():
 	names = City.query.all()
 	return render_template('cities.html',names=names)
 
-# @app.route('/zips')
-# def all_zips():
-#
+@app.route('/zips')
+def all_zips():
+	zips = ZIP.query.all()
+	return render_template('zips.html', names=zips)
 
-
-
+@app.route('/userform')
+def user_app():
+	form = UserForm()
+	if form.validate_on_submit():
+		username = form.username.data
+		fullname = form.fullname.data
 
 
 

@@ -1,13 +1,15 @@
 
-
+<h1>ZIP Code app</h1>
+<h4>Joshua Walker SI364 midterm project</h4>
 {% block content1 %}
 
-<form action="{{ url_for('home') }}" method="POST">
-    {{ form.name.label() }}{{ form.name() }}<br>
-	{{ form.state.label() }}{{ form.state() }}
-    {{ form.submit() }}
-    {{ form.hidden_tag() }}
-</form>
-
-
 {% endblock %}
+
+<p>------------</p>
+<h3>Navigation</h3>
+<ul>
+    <li><a href="{{ url_for('home')}}">Home page / input form</a></li>
+    <li><a href="{{ url_for('all_zips')}}">See all saved zip codes</a></li>
+    <li><a href="{{ url_for('all_cities')}}">See all saved cities</a></li>
+	<li><a href="">See all saved states</a></li>
+</ul>
