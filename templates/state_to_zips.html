@@ -1,0 +1,13 @@
+<form action="{{ url_for('state_to_zips') }}" method="POST">
+    {{ form.hidden_tag() }}
+	{{ form.state.label() }}{{ form.state() }}
+
+    {{ form.submit() }}
+	<br>
+
+	<ul>
+		{% for zip in zip_list %}
+		<li>{{ zip }}</li>
+		{% endfor %}
+	</ul>
+</form>

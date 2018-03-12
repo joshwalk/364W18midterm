@@ -62,7 +62,7 @@ class State(db.Model):
 	abbrev = db.Column(db.String(64))
 
 	def __repr__(self):
-		return "State name:{} Abbreviation: {})".format(self.name, self.abbrev)
+		return "State name:{} ({})".format(self.name, self.abbrev)
 
 
 ###################
@@ -86,6 +86,10 @@ class ZIPForm(FlaskForm):
 class UserForm(FlaskForm):
 	username = StringField("Enter your user name:",validators=[Required()])
 	fullname = StringField("Enter your full name:",validators=[Required()])
+	submit = SubmitField()
+
+class StateToZIPSForm(FlaskForm):
+	state = StringField("Enter state (full name, not abbrev):", validators=[Required()])
 	submit = SubmitField()
 
 #######################
@@ -144,13 +148,36 @@ def all_zips():
 	zips = ZIP.query.all()
 	return render_template('zips.html', names=zips)
 
-@app.route('/userform')
-def user_app():
-	form = UserForm()
-	if form.validate_on_submit():
-		username = form.username.data
-		fullname = form.fullname.data
+@app.route('/states')
+def all_states():
+	states = State.query.all()
+	return render_template('states.html', names=states)
 
+@app.route('/userform')
+def user_form():
+	form = UserForm()
+	return render_template('userform.html', form=form)
+
+@app.route('/userresults', methods = ["GET","POST"])
+def user_results():
+	if request.args:
+		username = request.args.get('username')
+		fullname = request.args.get('fullname')
+		return render_template('userresults.html', username=username,fullname=fullname)
+	flash(form.errors)
+	return redirect(url_for('user_form'))
+
+@app.route('/statetozips', methods = ["GET","POST"])
+def state_to_zips():
+	form = StateToZIPSForm()
+	zip_list = []
+	if form.validate_on_submit():
+		state = form.state.data
+		state_id = State.query.filter_by(name=state).first().id
+		for city in City.query.filter_by(state_id=state_id):
+			for zip in ZIP.query.filter_by(city_id=city.id):
+				zip_list.append(zip.zip_code)
+	return render_template('state_to_zips.html', zip_list=zip_list, form=form)
 
 
 ## Code to run the application...

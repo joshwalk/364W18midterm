@@ -2,16 +2,17 @@
 {% extends 'base.html' %}
 {% block content1 %}
 
-<h1>ZIP Codes</h1>
+<h1>States</h1>
 
-
-    <p>{{ names }}</p>
-
+{% for n in names %}
+    <p>{{ n }}</p>
+{% endfor %}
 
 <div>
 {% for message in get_flashed_messages() %}
     <strong>*** {{ message }} ***</strong>
 {% endfor %}
 </div>
+
 
 {% endblock %}

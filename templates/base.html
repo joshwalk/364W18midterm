@@ -1,15 +1,16 @@
 
-<h1>ZIP Code app</h1>
-<h4>Joshua Walker SI364 midterm project</h4>
+<h1>Joshua Walker SI364 Midterm</h1>
 {% block content1 %}
 
 {% endblock %}
 
-<p>------------</p>
+<hr>
 <h3>Navigation</h3>
 <ul>
     <li><a href="{{ url_for('home')}}">Home page / input form</a></li>
     <li><a href="{{ url_for('all_zips')}}">See all saved zip codes</a></li>
     <li><a href="{{ url_for('all_cities')}}">See all saved cities</a></li>
-	<li><a href="">See all saved states</a></li>
+	<li><a href="{{ url_for('all_states')}}">See all saved states</a></li>
+	<li><a href="{{ url_for('state_to_zips')}}">Input state name and see all stored ZIPs</a></li>
+	<li><a href="{{ url_for('user_form')}}">Go to username app</a></li>
 </ul>
