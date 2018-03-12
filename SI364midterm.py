@@ -100,6 +100,9 @@ class StateToZIPSForm(FlaskForm):
 def page_not_found(e):
 	return render_template('404.html'), 404
 
+# user inputs city name and state abbrevation
+# uses zippopatamus http://www.zippopotam.us API to get that city's zip codes
+# zips, cities, and states (both abbrev and full state name) are all stored in database
 @app.route('/', methods=['GET', 'POST'])
 def home():
 	form = ZIPForm()
@@ -158,6 +161,8 @@ def user_form():
 	form = UserForm()
 	return render_template('userform.html', form=form)
 
+# this uses GET method
+# I made this a separate app; functionality separate from ZIP code app
 @app.route('/userresults', methods = ["GET","POST"])
 def user_results():
 	if request.args:
@@ -167,6 +172,8 @@ def user_results():
 	flash(form.errors)
 	return redirect(url_for('user_form'))
 
+# this uses POST method and shows results on same page
+# user inputs a state's full name and it retrieves all zip codes saved in database from that state
 @app.route('/statetozips', methods = ["GET","POST"])
 def state_to_zips():
 	form = StateToZIPSForm()
