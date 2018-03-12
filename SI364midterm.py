@@ -19,7 +19,7 @@ app.debug = True
 app.use_reloader = True
 
 ## All app.config values
-app.config['SECRET_KEY'] = 'hard to guess string from si364'
+app.config['SECRET_KEY'] = 'mysecretkey'
 app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://localhost/joshwalk364midterm"
 app.config['SQLALCHEMY_COMMIT_ON_TEARDOWN'] = True
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -102,7 +102,7 @@ def page_not_found(e):
 
 @app.route('/', methods=['GET', 'POST'])
 def home():
-	form = ZIPForm() # User should be able to enter name after name and each one will be saved, even if it's a duplicate! Sends data with GET
+	form = ZIPForm()
 	if form.validate_on_submit():
 		city_entered = form.name.data
 		state_entered  = form.state.data
